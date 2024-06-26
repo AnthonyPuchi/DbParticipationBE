@@ -1,0 +1,253 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                 String            @id @default(uuid()) @db.Uuid
+  institutionalEmail String            @unique
+  firstName          String
+  lastName           String
+  description        String?
+  age                Int
+  phone              String
+  sex                Sex
+  gender             Gender
+  isActive           Boolean
+  userRoles          UserRole[]
+  studentProfile     StudentProfile?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  userTopics         UserTopic[]
+  roomMemberships    UserRoom[]
+  transcriptions     Transcription[]
+  userInstitutions   UserInstitution[]
+  userCareers        UserCareer[]
+  Room               Room[]
+}
+
+model Institution {
+  id                 String              @id @default(uuid()) @db.Uuid
+  name               String
+  description        String
+  type               InstitutionType
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  userInstitutions   UserInstitution[]
+  institutionCareers InstitutionCareer[]
+}
+ 
+model Career {
+  id                 String              @id @default(uuid()) @db.Uuid
+  name               String
+  description        String
+  type               CareerType
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  userCareers        UserCareer[]
+  institutionCareers InstitutionCareer[]
+}
+
+model UserInstitution {
+  userId        String      @default(uuid()) @db.Uuid
+  institutionId String      @default(uuid()) @db.Uuid
+  user          User        @relation(fields: [userId], references: [id])
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now())
+
+  @@id([userId, institutionId])
+}
+
+model UserCareer {
+  userId    String   @default(uuid()) @db.Uuid
+  careerId  String   @default(uuid()) @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  career    Career   @relation(fields: [careerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@id([userId, careerId])
+}
+
+model InstitutionCareer {
+  institutionId String      @default(uuid()) @db.Uuid
+  careerId      String      @default(uuid()) @db.Uuid
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  career        Career      @relation(fields: [careerId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now())
+
+  @@id([institutionId, careerId])
+}
+
+model Role {
+  id              String           @id @default(uuid()) @db.Uuid
+  roleName        String           @unique
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now())
+}
+
+model Permission {
+  id              String           @id @default(uuid()) @db.Uuid
+  permissionName  String
+  rolePermissions RolePermission[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now())
+}
+
+model RolePermission {
+  roleId       String     @default(uuid()) @db.Uuid
+  permissionId String     @default(uuid()) @db.Uuid
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now())
+
+  @@id([roleId, permissionId])
+}
+
+model UserRole {
+  userId    String   @default(uuid()) @db.Uuid
+  roleId    String   @default(uuid()) @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  role      Role     @relation(fields: [roleId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@id([userId, roleId])
+}
+
+model Room {
+  id                  String            @id @default(uuid()) @db.Uuid
+  title               String
+  description         String
+  isActive            Boolean
+  topics              Topic[]
+  roomMembers         UserRoom[]
+  focusScoreFormulaId String            @default(uuid()) @db.Uuid
+  createdBy           String            @default(uuid()) @db.Uuid
+  createdByUser       User              @relation(fields: [createdBy], references: [id])
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @default(now())
+  FocusScoreFormula   FocusScoreFormula @relation(fields: [focusScoreFormulaId], references: [id])
+}
+
+model Topic {
+  id             String          @id @default(uuid()) @db.Uuid
+  title          String
+  roomId         String          @default(uuid()) @db.Uuid
+  room           Room            @relation(fields: [roomId], references: [id])
+  transcriptions Transcription[]
+  entities       String[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now())
+  userTopics     UserTopic[]
+}
+
+model UserTopic {
+  userId             String   @default(uuid()) @db.Uuid
+  topicId            String   @default(uuid()) @db.Uuid
+  participationCount Int      @default(0) // Track user participation count in topic
+  user               User     @relation(fields: [userId], references: [id])
+  topic              Topic    @relation(fields: [topicId], references: [id])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+
+  @@id([userId, topicId])
+}
+
+model UserRoom {
+  userId             String   @default(uuid()) @db.Uuid
+  roomId             String   @default(uuid()) @db.Uuid
+  roomRoleId         String   @default(uuid()) @db.Uuid
+  participationCount Int      @default(0) // Track user participation count in room
+  user               User     @relation(fields: [userId], references: [id])
+  room               Room     @relation(fields: [roomId], references: [id])
+  roomRole           RoomRole @relation(fields: [roomRoleId], references: [id])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+
+  @@id([userId, roomId])
+}
+
+model RoomRole {
+  id        String     @id @default(uuid()) @db.Uuid
+  roleName  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  userRooms UserRoom[]
+}
+
+model Transcription {
+  id              String   @id @default(uuid()) @db.Uuid
+  transcribedText String
+  principalEntity String
+  date            DateTime
+  topicId         String   @default(uuid()) @db.Uuid
+  userId          String   @default(uuid()) @db.Uuid
+  topic           Topic    @relation(fields: [topicId], references: [id])
+  user            User     @relation(fields: [userId], references: [id])
+  entities        String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
+}
+
+model StudentProfile {
+  id        String   @id @default(uuid()) @db.Uuid
+  level     Level
+  grades    Float
+  user      User     @relation(fields: [id], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model FocusScoreFormula {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  formula   String
+  rooms     Room[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+enum Gender {
+  Male
+  Female
+  NoBinary
+}
+
+enum Sex {
+  Male
+  Female
+}
+
+enum Level {
+  First
+  Second
+  Third
+  Fourth
+  Fifth
+  Sixth
+  Eighth
+  Ninth
+  Tenth
+}
+
+enum InstitutionType {
+  SuperiorTechnologic
+  TecnologicUniversity
+  University
+}
+
+enum CareerType {
+  Engineering
+  HealthSciences
+  SocialSciences
+}
