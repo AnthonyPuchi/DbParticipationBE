@@ -1,6 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { FocusScoreFormula, Topic, UserRoom } from "@prisma/client";
-import { IsString,IsBoolean,IsArray, ArrayNotEmpty} from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsUUID, IsBoolean, IsArray } from 'class-validator';
+import { UserRoom } from '@prisma/client';
 
 export class CreateRoomDto {
     @ApiProperty()
@@ -16,14 +16,14 @@ export class CreateRoomDto {
     isActive: boolean;
 
     @ApiProperty()
-    @IsArray()
-    topics: Topic[];
+    @IsUUID()
+    createdBy: string;
+
+    @ApiProperty()
+    @IsUUID()
+    focusScoreFormulaId: string;
 
     @ApiProperty()
     @IsArray()
     roomMembers: UserRoom[];
-
-    @ApiProperty()
-    @IsString()
-    focusScoreFormulaId: string;
 }

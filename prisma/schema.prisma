@@ -27,7 +27,7 @@ model User {
   transcriptions     Transcription[]
   userInstitutions   UserInstitution[]
   userCareers        UserCareer[]
-  Room               Room[]
+  Room               Room[]            @relation("UserRooms")
 }
 
 model Institution {
@@ -40,7 +40,7 @@ model Institution {
   userInstitutions   UserInstitution[]
   institutionCareers InstitutionCareer[]
 }
- 
+
 model Career {
   id                 String              @id @default(uuid()) @db.Uuid
   name               String
@@ -133,7 +133,7 @@ model Room {
   roomMembers         UserRoom[]
   focusScoreFormulaId String            @default(uuid()) @db.Uuid
   createdBy           String            @default(uuid()) @db.Uuid
-  createdByUser       User              @relation(fields: [createdBy], references: [id])
+  user                User              @relation(fields: [createdBy], references: [id], name: "UserRooms")
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @default(now())
   FocusScoreFormula   FocusScoreFormula @relation(fields: [focusScoreFormulaId], references: [id])
@@ -152,15 +152,15 @@ model Topic {
 }
 
 model UserTopic {
-  userId             String   @default(uuid()) @db.Uuid
-  topicId            String   @default(uuid()) @db.Uuid
-  participationCount Int      @default(0) // Track user participation count in topic
-  user               User     @relation(fields: [userId], references: [id])
-  topic              Topic    @relation(fields: [topicId], references: [id])
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @default(now())
-
-  @@id([userId, topicId])
+  id                 String              @id @default(uuid()) @db.Uuid
+  userId             String              @db.Uuid
+  topicId            String              @db.Uuid
+  participationCount Int                 @default(0)
+  user               User                @relation(fields: [userId], references: [id])
+  topic              Topic               @relation(fields: [topicId], references: [id])
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  userParticipations UserParticipation[]
 }
 
 model UserRoom {
@@ -215,6 +215,16 @@ model FocusScoreFormula {
   rooms     Room[]
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+}
+
+model UserParticipation {
+  id          String    @id @default(uuid()) @db.Uuid
+  userTopicId String    @db.Uuid
+  message     String
+  status      Boolean
+  userTopic   UserTopic @relation(fields: [userTopicId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
 }
 
 enum Gender {

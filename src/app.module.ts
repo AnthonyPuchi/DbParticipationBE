@@ -9,10 +9,11 @@ import { UsersTopicsModule } from './users-topics/users-topics.module';
 import { RolesModule } from './roles/roles.module';
 import { UsersRolesModule } from './users-roles/users-roles.module';
 import {ParticipationModule} from "./participation/participation.module";
-
+import { UserParticipationModule } from './user-participation/userparticipation.module';
+import { UsersRoomsModule} from "./users-rooms/users-rooms.module";
 
 @Module({
-  imports: [PrismaModule, UsersModule, TopicsModule, RoomsModule, RolesModule, UsersRolesModule, UsersTopicsModule, ParticipationModule],
+  imports: [PrismaModule, UsersModule, UsersRoomsModule, TopicsModule, RoomsModule, RolesModule, UsersRolesModule, UsersTopicsModule, ParticipationModule, UserParticipationModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -17,18 +17,18 @@ export class UsersTopicsController {
     return this.usersTopicsService.findAll();
   }
 
-  @Get(':userId/:topicId')
-  findOne(@Param('userId') userId: string, @Param('topicId') topicId: string){
-    return this.usersTopicsService.findOne(userId, topicId);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersTopicsService.findOne(id);
   }
 
-  @Patch(':userId/:topicId')
-  update(@Param('userId') userId: string, @Param('topicId') topicId: string, @Body() updateUserTopicDto: UpdateUserTopicDto) {
-    return this.usersTopicsService.update(userId, topicId, updateUserTopicDto);
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserTopicDto: UpdateUserTopicDto) {
+    return this.usersTopicsService.update(id, updateUserTopicDto);
   }
 
-  @Delete(':userId/:topicId')
-  remove(@Param('userId') userId: string, @Param('topicId') topicId: string){
-    return this.usersTopicsService.remove(userId, topicId);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersTopicsService.remove(id);
   }
 }

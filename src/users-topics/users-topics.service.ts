@@ -7,23 +7,35 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class UsersTopicsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createUserTopicDto: CreateUserTopicDto) {
-    return this.prisma.userTopic.create({data: createUserTopicDto});
+  async create(createUserTopicDto: CreateUserTopicDto) {
+    try {
+      return await this.prisma.userTopic.create({ data: createUserTopicDto });
+    } catch (error) {
+      throw new Error(`Failed to create UserTopic: ${error.message}`);
+    }
   }
 
-  findAll() {
-    return this.prisma.userTopic.findMany();
+  async findAll() {
+    return await this.prisma.userTopic.findMany();
   }
 
-  findOne(userId: string, topicId: string) {
-    return this.prisma.userTopic.findUnique({where: {userId_topicId: {userId, topicId}}});
+  async findOne(id: string) {
+    return await this.prisma.userTopic.findUnique({ where: { id } });
   }
 
-  update(userId: string, topicId: string , updateUsersTopicDto: UpdateUserTopicDto) {
-    return this.prisma.userTopic.update({where: {userId_topicId: {userId, topicId}}, data: updateUsersTopicDto});
+  async update(id: string, updateUserTopicDto: UpdateUserTopicDto) {
+    try {
+      return await this.prisma.userTopic.update({ where: { id }, data: updateUserTopicDto });
+    } catch (error) {
+      throw new Error(`Failed to update UserTopic: ${error.message}`);
+    }
   }
 
-  remove(userId: string, topicId: string) {
-    return this.prisma.userTopic.delete({where: {userId_topicId: {userId, topicId}}});
+  async remove(id: string) {
+    try {
+      return await this.prisma.userTopic.delete({ where: { id } });
+    } catch (error) {
+      throw new Error(`Failed to delete UserTopic: ${error.message}`);
+    }
   }
 }
