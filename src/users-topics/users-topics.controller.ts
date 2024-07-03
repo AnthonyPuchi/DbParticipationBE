@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException } from "@nestjs/common";
 import { UsersTopicsService } from './users-topics.service';
 import { CreateUserTopicDto } from './dto/create-users-topic.dto';
 import { UpdateUserTopicDto } from './dto/update-users-topic.dto';
@@ -20,6 +20,38 @@ export class UsersTopicsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersTopicsService.findOne(id);
+  }
+
+  @Get('user/:userId/topic/:topicId')
+  async getUserTopic(
+    @Param('userId') userId: string,
+    @Param('topicId') topicId: string
+  ) {
+    const userTopic = await this.usersTopicsService.findUserTopic(userId, topicId);
+    if (!userTopic) {
+      throw new NotFoundException(`UserTopic with userId ${userId} and topicId ${topicId} not found`);
+    }
+    return userTopic;
+  }
+
+  @Get('user/:userId')
+  async findUserTopicsByUserId(@Param('userId') userId: string) {
+    try {
+      const userTopics = await this.usersTopicsService.findUserTopicsByUserId(userId);
+      return { userTopics };
+    } catch (error) {
+      return { message: 'Failed to find UserTopics by userId', error: error.message };
+    }
+  }
+
+  @Get('topic/:topicId')
+  async findUserTopicsByTopicId(@Param('topicId') topicId: string) {
+    try {
+      const userTopics = await this.usersTopicsService.findUserTopicsByTopicId(topicId);
+      return { userTopics };
+    } catch (error) {
+      return { message: 'Failed to find UserTopics by topicId', error: error.message };
+    }
   }
 
   @Patch(':id')

@@ -23,6 +23,27 @@ export class UsersTopicsService {
     return await this.prisma.userTopic.findUnique({ where: { id } });
   }
 
+  async findUserTopic(userId: string, topicId: string) {
+    return this.prisma.userTopic.findFirst({
+      where: {
+        userId: userId,
+        topicId: topicId,
+      },
+    });
+  }
+
+  async findUserTopicsByUserId(userId: string) {
+    return await this.prisma.userTopic.findMany({
+      where: { userId },
+    });
+  }
+
+  async findUserTopicsByTopicId(topicId: string) {
+    return await this.prisma.userTopic.findMany({
+      where: { topicId },
+    });
+  }
+
   async update(id: string, updateUserTopicDto: UpdateUserTopicDto) {
     try {
       return await this.prisma.userTopic.update({ where: { id }, data: updateUserTopicDto });
