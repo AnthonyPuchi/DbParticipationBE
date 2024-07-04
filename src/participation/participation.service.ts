@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserTopic } from "@prisma/client";
+import { User } from '.prisma/client';
 
 @Injectable()
 export class ParticipationService {
@@ -60,38 +60,65 @@ export class ParticipationService {
     }
 
     async incrementParticipationCount(userId: string, topicId: string) {
-        const userTopic = await this.prisma.userTopic.findUnique({
-            where: { userId_topicId: { userId, topicId } },
-            include: { userParticipations: true },
-        });
+        try {
+            const userTopic = await this.prisma.userTopic.findFirst({
+                where: { userId, topicId },
+            });
 
-        if (!userTopic) {
-            throw new Error('UserTopic not found');
+            if (userTopic) {
+                await this.prisma.userTopic.update({
+                    where: { id: userTopic.id },
+                    data: {
+                        participationCount: userTopic.participationCount + 1,
+                    },
+                });
+            } else {
+                await this.prisma.userTopic.create({
+                    data: {
+                        userId,
+                        topicId,
+                        participationCount: 1,
+                    },
+                });
+            }
+        } catch (error) {
+            throw new Error(`Failed to increment participation count: ${error.message}`);
         }
-
-        const updatedUserTopic = await this.prisma.userTopic.update({
-            where: { userId_topicId: { userId, topicId } },
-            data: { participationCount: { increment: 1 } },
-        });
-
-        return updatedUserTopic;
     }
 
-    async deleteUserParticipation(userId: string, topicId: string): Promise<UserTopic> {
-        // Verificar si la participación del usuario en el tema existe
-        const existingUserTopic = await this.prisma.userTopic.findUnique({
-            where: { userId_topicId: { userId, topicId } },
+    async listStudentsNotParticipatedByCriteria(topicId: string) {
+        const participatingUserIds = await this.prisma.userTopic.findMany({
+            where: { topicId, participationCount: { gt: 0 } },
+            select: { userId: true },
         });
 
-        if (!existingUserTopic) {
-            throw new NotFoundException(`User with ID ${userId} is not participating in topic with ID ${topicId}`);
-        }
+        const participatingUserIdSet = new Set(participatingUserIds.map(user => user.userId));
 
-        // Eliminar la participación del usuario en el tema
-        const deletedUserTopic = await this.prisma.userTopic.delete({
-            where: { userId_topicId: { userId, topicId } },
+        const notParticipatedUsers = await this.prisma.user.findMany({
+            where: {
+                id: { notIn: Array.from(participatingUserIdSet) },
+                studentProfile: {
+                    NOT: {
+                        OR: [
+                            { grades: { gte: 70 } },
+                            {AND: [
+                                    { user: { sex: "Male" } },
+                                    { grades: { gte: 70 }  },
+                                ] },
+                        ],
+                    },
+                },
+            },
+            include: {
+                studentProfile: true,
+            },
+            orderBy: {
+                studentProfile: {
+                    grades: 'asc',
+                },
+            },
         });
 
-        return deletedUserTopic;
+        return notParticipatedUsers;
     }
 }

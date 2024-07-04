@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Patch, Body, NotFoundException, Delete } from "@nestjs/common";
+import { Controller, Get, NotFoundException, Param, Patch } from "@nestjs/common";
 import { ParticipationService } from './participation.service';
+import { User } from "@prisma/client";
 
 @Controller('participation')
 export class ParticipationController {
@@ -20,24 +21,21 @@ export class ParticipationController {
         return this.participationService.getTopicParticipationCount(topicId);
     }
 
-    @Patch('increment-participation')
-    async incrementParticipationCount(@Body('userId') userId: string, @Body('topicId') topicId: string) {
-        return this.participationService.incrementParticipationCount(userId, topicId);
-    }
-
-    @Delete(':userId/:topicId')
-    async deleteUserParticipation(
+    @Patch('/increment-participation/:userId/:topicId')
+    async incrementParticipationCount(
       @Param('userId') userId: string,
       @Param('topicId') topicId: string,
     ) {
         try {
-            const deletedUserTopic = await this.participationService.deleteUserParticipation(userId, topicId);
-            return { message: 'User participation deleted successfully', deletedUserTopic };
+            await this.participationService.incrementParticipationCount(userId, topicId);
+            return { message: 'Participation count incremented successfully' };
         } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw new NotFoundException(error.message);
-            }
-            throw error; // Cualquier otro tipo de error se propaga
+            throw new NotFoundException(`Failed to increment participation count: ${error.message}`);
         }
+    }
+
+    @Get('topic/list-not-participated-criteria/:topicId')
+    async listNotParticipatedByCriteria(@Param('topicId') topicId: string) {
+        return this.participationService.listStudentsNotParticipatedByCriteria(topicId);
     }
 }
