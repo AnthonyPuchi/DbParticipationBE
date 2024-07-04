@@ -16,7 +16,7 @@ export class UsersTopicsService {
   }
 
   async findAll() {
-    return await this.prisma.userTopic.findMany();
+    return this.prisma.userTopic.findMany();
   }
 
   async findOne(id: string) {
@@ -33,13 +33,13 @@ export class UsersTopicsService {
   }
 
   async findUserTopicsByUserId(userId: string) {
-    return await this.prisma.userTopic.findMany({
+    return this.prisma.userTopic.findMany({
       where: { userId },
     });
   }
 
   async findUserTopicsByTopicId(topicId: string) {
-    return await this.prisma.userTopic.findMany({
+    return this.prisma.userTopic.findMany({
       where: { topicId },
     });
   }

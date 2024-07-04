@@ -159,8 +159,10 @@ model UserTopic {
   user               User                @relation(fields: [userId], references: [id])
   topic              Topic               @relation(fields: [topicId], references: [id])
   createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now()) @updatedAt
   userParticipations UserParticipation[]
+
+  @@unique([userId, topicId])
 }
 
 model UserRoom {

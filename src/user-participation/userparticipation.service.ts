@@ -1,6 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserParticipationDto } from './dto/create-userparticipation.dto';
-import { UpdateUserParticipationDto } from './dto/update-userparticipation.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserParticipation } from '@prisma/client';
 
@@ -8,7 +6,7 @@ import { UserParticipation } from '@prisma/client';
 export class UserParticipationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateUserParticipationDto): Promise<UserParticipation> {
+  async create(data: any): Promise<UserParticipation> {
     return this.prisma.userParticipation.create({ data });
   }
 
@@ -24,10 +22,10 @@ export class UserParticipationService {
     return userParticipation;
   }
 
-  async update(id: string, updateUserParticipationDto: UpdateUserParticipationDto): Promise<UserParticipation> {
+  async update(id: string, data: any): Promise<UserParticipation> {
     const updatedUserParticipation = await this.prisma.userParticipation.update({
       where: { id },
-      data: updateUserParticipationDto,
+      data,
     });
     if (!updatedUserParticipation) {
       throw new NotFoundException(`User participation with ID ${id} not found`);
