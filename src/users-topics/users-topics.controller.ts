@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  NotFoundException,
+  InternalServerErrorException
+} from "@nestjs/common";
 import { UsersTopicsService } from './users-topics.service';
 import { CreateUserTopicDto } from './dto/create-users-topic.dto';
 import { UpdateUserTopicDto } from './dto/update-users-topic.dto';
@@ -32,6 +42,16 @@ export class UsersTopicsController {
       throw new NotFoundException(`UserTopic with userId ${userId} and topicId ${topicId} not found`);
     }
     return userTopic;
+  }
+
+  @Post('increment/:userTopicId')
+  async incrementParticipantCount(@Param('userTopicId') userTopicId: string) {
+    try {
+      return await this.usersTopicsService.incrementParticipantCount(userTopicId);
+    } catch (error) {
+      console.error('Error incrementing participant count:', error);
+      throw new InternalServerErrorException('Failed to increment participant count');
+    }
   }
 
   @Get('user/:userId')

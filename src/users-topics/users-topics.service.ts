@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserTopicDto } from './dto/create-users-topic.dto';
 import { UpdateUserTopicDto } from './dto/update-users-topic.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsersTopicsService {
@@ -57,6 +57,21 @@ export class UsersTopicsService {
       return await this.prisma.userTopic.delete({ where: { id } });
     } catch (error) {
       throw new Error(`Failed to delete UserTopic: ${error.message}`);
+    }
+  }
+
+  async incrementParticipantCount(userTopicId: string) {
+    try {
+      return await this.prisma.userTopic.update({
+        where: { id: userTopicId },
+        data: {
+          participationCount: {
+            increment: 1,
+          },
+        },
+      });
+    } catch (error) {
+      throw new Error(`Failed to increment participant count: ${error.message}`);
     }
   }
 }

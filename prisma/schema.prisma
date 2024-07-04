@@ -28,7 +28,6 @@ model User {
   userInstitutions   UserInstitution[]
   userCareers        UserCareer[]
   Room               Room[]            @relation("UserRooms")
-  auth0Sub           String            @unique
 }
 
 model Institution {
