@@ -8,7 +8,7 @@ export class UserParticipationController {
   constructor(private readonly userParticipationService: UserParticipationService) {}
 
   @Post()
-  create(@Body() createUserParticipationDto: CreateUserParticipationDto) {
+  async create(@Body() createUserParticipationDto: CreateUserParticipationDto) {
     return this.userParticipationService.create(createUserParticipationDto);
   }
 
@@ -20,6 +20,11 @@ export class UserParticipationController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userParticipationService.findOne(id);
+  }
+
+  @Get('by-topic/:topicId')
+  async findByTopicId(@Param('topicId') topicId: string) {
+    return this.userParticipationService.findByTopicId(topicId);
   }
 
   @Patch(':id')
