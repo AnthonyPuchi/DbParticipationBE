@@ -18,13 +18,29 @@ export class UserParticipationService {
       throw new BadRequestException(analysisResult);
     }
 
-    // Crear la participación del usuario
-    const userParticipation = await this.prisma.userParticipation.create({ data });
+    // Obtener el userTopic para obtener el userId
+    const userTopic = await this.prisma.userTopic.findUnique({
+      where: { id: data.userTopicId },
+      include: { user: true },
+    });
+
+    if (!userTopic) {
+      throw new NotFoundException(`UserTopic with ID ${data.userTopicId} not found`);
+    }
+
+    // Incluir el nombre del usuario en el mensaje
+    const messageWithSender = {
+      ...data,
+      sender: `${userTopic.user.firstName} ${userTopic.user.lastName}`,
+    };
+
+    // Crear la participación del usuario con el nombre del remitente
+    const userParticipation = await this.prisma.userParticipation.create({ data: messageWithSender });
 
     // Devolver la participación del usuario junto con el resultado del análisis
     return {
       userParticipation,
-      analysisResult
+      analysisResult,
     };
   }
 
@@ -48,7 +64,11 @@ export class UserParticipationService {
         },
       },
       include: {
-        userTopic: true,
+        userTopic: {
+          include: {
+            user: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'asc',
