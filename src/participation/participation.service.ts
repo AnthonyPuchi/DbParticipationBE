@@ -21,7 +21,7 @@ export class ParticipationService {
 
     async listNotParticipated(topicId: string) {
         const participatingUserIds = await this.prisma.userTopic.findMany({
-            where: { topicId },
+            where: { topicId, participationCount: 0 },
             select: { userId: true },
         });
 
@@ -29,12 +29,13 @@ export class ParticipationService {
 
         const notParticipatedUsers = await this.prisma.user.findMany({
             where: {
-                id: { notIn: Array.from(participatingUserIdSet) },
+                id: { in: Array.from(participatingUserIdSet) },
             },
         });
 
         return notParticipatedUsers;
     }
+
 
     async getTopicParticipationCount(topicId: string) {
         const participationCounts = await this.prisma.userTopic.findMany({

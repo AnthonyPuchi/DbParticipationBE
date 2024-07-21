@@ -84,4 +84,30 @@ export class UsersTopicsService {
       throw new Error(`Failed to increment participant count: ${error.message}`);
     }
   }
+
+  async recalculateParticipantCount(userTopicId: string) {
+    try {
+      const participations = await this.prisma.userParticipation.findMany({
+        where: { userTopicId },
+      });
+
+      const newCount = participations.length;
+
+      return await this.prisma.userTopic.update({
+        where: { id: userTopicId },
+        data: { participationCount: newCount },
+      });
+    } catch (error) {
+      throw new Error(`Failed to recalculate participant count: ${error.message}`);
+    }
+  }
+
+  async deleteParticipation(participationId: string, userTopicId: string) {
+    try {
+      await this.prisma.userParticipation.delete({ where: { id: participationId } });
+      await this.recalculateParticipantCount(userTopicId);
+    } catch (error) {
+      throw new Error(`Failed to delete participation: ${error.message}`);
+    }
+  }
 }
