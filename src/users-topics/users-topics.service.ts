@@ -62,7 +62,6 @@ export class UsersTopicsService {
 
   async incrementParticipantCount(userTopicId: string) {
     try {
-      // Obtener el conteo actual de participaciones
       const userTopic = await this.prisma.userTopic.findUnique({
         where: { id: userTopicId },
       });
@@ -71,15 +70,12 @@ export class UsersTopicsService {
         throw new Error(`UserTopic with id ${userTopicId} not found`);
       }
 
-      // Obtener todas las participaciones asociadas a este userTopic
       const participations = await this.prisma.userParticipation.findMany({
         where: { userTopicId },
       });
 
-      // Calcular el nuevo conteo de participaciones
       const newCount = participations.length;
 
-      // Actualizar el conteo de participaciones en la base de datos
       return await this.prisma.userTopic.update({
         where: { id: userTopicId },
         data: { participationCount: newCount },

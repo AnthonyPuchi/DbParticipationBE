@@ -33,7 +33,7 @@ async function bootstrap() {
     console.log('a user connected');
 
     socket.on('sendMessage', (message) => {
-      io.emit('newMessage', message); // Emitir el mensaje a todos los clientes
+      io.emit('newMessage', message);
     });
 
     socket.on('disconnect', () => {

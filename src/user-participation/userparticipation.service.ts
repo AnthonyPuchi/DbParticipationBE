@@ -11,14 +11,34 @@ export class UserParticipationService {
   ) {}
 
   async create(data: any): Promise<any> {
-    const analysisResult = await this.messageAnalysisService.analyzeMessage(data.message);
-    console.log('Analysis Result:', analysisResult); // Para depuración
+    const userParticipations = await this.prisma.userParticipation.findMany({
+      where: { userTopicId: data.userTopicId },
+      include: {
+        userTopic: {
+          include: {
+            user: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
 
-    if (analysisResult.includes('no aporta nada en la discusión')) {
-      throw new BadRequestException(analysisResult);
+    let analysisResult = '';
+
+    if ((userParticipations.length + 1) % 10 === 0) {
+      const messages = userParticipations.map(up => up.message).concat(data.message);
+      const usernames = userParticipations.map(up => `${up.userTopic.user.firstName} ${up.userTopic.user.lastName}`).concat(`${data.senderFirstName} ${data.senderLastName}`);
+
+      for (let i = 0; i < messages.length; i++) {
+        analysisResult = await this.messageAnalysisService.analyzeMessages(messages, usernames[i]);
+        console.log('Analysis Result:', analysisResult); // Para depuración
+
+        if (analysisResult.includes('no está aportando nada nuevo a la discusión')) {
+          throw new BadRequestException(analysisResult);
+        }
+      }
     }
 
-    // Obtener el userTopic para obtener el userId
     const userTopic = await this.prisma.userTopic.findUnique({
       where: { id: data.userTopicId },
       include: { user: true },
@@ -28,16 +48,13 @@ export class UserParticipationService {
       throw new NotFoundException(`UserTopic with ID ${data.userTopicId} not found`);
     }
 
-    // Incluir el nombre del usuario en el mensaje
     const messageWithSender = {
       ...data,
       sender: `${userTopic.user.firstName} ${userTopic.user.lastName}`,
     };
 
-    // Crear la participación del usuario con el nombre del remitente
     const userParticipation = await this.prisma.userParticipation.create({ data: messageWithSender });
 
-    // Devolver la participación del usuario junto con el resultado del análisis
     return {
       userParticipation,
       analysisResult,
