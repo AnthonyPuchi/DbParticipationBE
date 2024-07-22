@@ -2,14 +2,14 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserParticipation } from '@prisma/client';
 import { MessageAnalysisService } from '../config/messageAnalysis.service';
-import { ParticipationService } from '../participation/participation.service'; // Asegúrate de importar el servicio
+import { ParticipationService } from '../participation/participation.service';
 
 @Injectable()
 export class UserParticipationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly messageAnalysisService: MessageAnalysisService,
-    private readonly participationService: ParticipationService, // Asegúrate de inyectar el servicio
+    private readonly participationService: ParticipationService,
   ) {}
 
   async create(data: any): Promise<any> {
@@ -88,8 +88,7 @@ export class UserParticipationService {
       include: {
         userTopic: {
           include: {
-            user: true,
-          },
+            user: true },
         },
       },
       orderBy: {
