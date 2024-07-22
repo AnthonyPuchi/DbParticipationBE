@@ -2,16 +2,18 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserParticipation } from '@prisma/client';
 import { MessageAnalysisService } from '../config/messageAnalysis.service';
+import { ParticipationService } from '../participation/participation.service'; // Asegúrate de importar el servicio
 
 @Injectable()
 export class UserParticipationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly messageAnalysisService: MessageAnalysisService,
+    private readonly participationService: ParticipationService, // Asegúrate de inyectar el servicio
   ) {}
 
   async create(data: any): Promise<any> {
-    const userParticipations = await this.prisma.userParticipation.findMany({
+    const allParticipations = await this.prisma.userParticipation.findMany({
       where: { userTopicId: data.userTopicId },
       include: {
         userTopic: {
@@ -25,9 +27,12 @@ export class UserParticipationService {
 
     let analysisResult = '';
 
-    if ((userParticipations.length + 1) % 10 === 0) {
-      const messages = userParticipations.map(up => up.message).concat(data.message);
-      const usernames = userParticipations.map(up => `${up.userTopic.user.firstName} ${up.userTopic.user.lastName}`).concat(`${data.senderFirstName} ${data.senderLastName}`);
+    // Obtener el total de participaciones generales
+    const { totalParticipation } = await this.participationService.getTotalParticipation(data.topicId);
+
+    if ((totalParticipation + 1) % 10 === 0) {
+      const messages = allParticipations.map(up => up.message).concat(data.message);
+      const usernames = allParticipations.map(up => `${up.userTopic.user.firstName} ${up.userTopic.user.lastName}`).concat(`${data.senderFirstName} ${data.senderLastName}`);
 
       for (let i = 0; i < messages.length; i++) {
         analysisResult = await this.messageAnalysisService.analyzeMessages(messages, usernames[i]);
