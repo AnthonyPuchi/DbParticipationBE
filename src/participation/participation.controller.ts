@@ -38,4 +38,9 @@ export class ParticipationController {
     async listNotParticipatedByCriteria(@Param('topicId') topicId: string) {
         return this.participationService.listStudentsNotParticipatedByCriteria(topicId);
     }
+
+    @Get('participants/:topicId')
+    async listParticipants(@Param('topicId') topicId: string) {
+        return this.participationService.listParticipants(topicId);
+    }
 }

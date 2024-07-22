@@ -122,4 +122,19 @@ export class ParticipationService {
 
         return notParticipatedUsers;
     }
+
+    async listParticipants(topicId: string) {
+        const participants = await this.prisma.userTopic.findMany({
+            where: { topicId },
+            include: {
+                user: true,
+            },
+        });
+
+        return participants.map(pt => ({
+            firstName: pt.user.firstName,
+            lastName: pt.user.lastName,
+            email: pt.user.institutionalEmail,
+        }));
+    }
 }
