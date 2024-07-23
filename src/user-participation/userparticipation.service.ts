@@ -13,8 +13,26 @@ export class UserParticipationService {
   ) {}
 
   async create(data: any): Promise<any> {
+    const userTopic = await this.prisma.userTopic.findUnique({
+      where: { id: data.userTopicId },
+      include: { user: true },
+    });
+
+    if (!userTopic) {
+      throw new NotFoundException(`UserTopic with ID ${data.userTopicId} not found`);
+    }
+
+    const lastUser = `${userTopic.user.firstName} ${userTopic.user.lastName}`;
+
+    const messageWithSender = {
+      ...data,
+      sender: lastUser,
+    };
+
+    const userParticipation = await this.prisma.userParticipation.create({ data: messageWithSender });
+
     const allParticipations = await this.prisma.userParticipation.findMany({
-      where: { userTopicId: data.userTopicId },
+      where: { userTopic: { topicId: data.topicId } },
       include: {
         userTopic: {
           include: {
@@ -25,44 +43,22 @@ export class UserParticipationService {
       orderBy: { createdAt: 'asc' },
     });
 
-    let analysisResult = '';
+    const totalParticipationCount = allParticipations.length;
 
-    // Obtener el total de participaciones generales
-    const { totalParticipation } = await this.participationService.getTotalParticipation(data.topicId);
+    if (totalParticipationCount % 10 === 0) {
+      const messages = allParticipations.slice(-10).map(up => up.message);
 
-    if ((totalParticipation + 1) % 10 === 0) {
-      const messages = allParticipations.map(up => up.message).concat(data.message);
-      const usernames = allParticipations.map(up => `${up.userTopic.user.firstName} ${up.userTopic.user.lastName}`).concat(`${data.senderFirstName} ${data.senderLastName}`);
+      const analysisResults = await this.messageAnalysisService.analyzeMessages(messages, lastUser);
+      console.log('Analysis Results:', analysisResults);
 
-      for (let i = 0; i < messages.length; i++) {
-        analysisResult = await this.messageAnalysisService.analyzeMessages(messages, usernames[i]);
-        console.log('Analysis Result:', analysisResult); // Para depuración
-
-        if (analysisResult.includes('no está aportando nada nuevo a la discusión')) {
-          throw new BadRequestException(analysisResult);
-        }
+      const noAportaMessages = analysisResults.filter(result => result.includes('no está aportando nada nuevo a la discusión'));
+      if (noAportaMessages.length > 0) {
+        throw new BadRequestException(`Análisis: ${noAportaMessages.join(', ')}`);
       }
     }
 
-    const userTopic = await this.prisma.userTopic.findUnique({
-      where: { id: data.userTopicId },
-      include: { user: true },
-    });
-
-    if (!userTopic) {
-      throw new NotFoundException(`UserTopic with ID ${data.userTopicId} not found`);
-    }
-
-    const messageWithSender = {
-      ...data,
-      sender: `${userTopic.user.firstName} ${userTopic.user.lastName}`,
-    };
-
-    const userParticipation = await this.prisma.userParticipation.create({ data: messageWithSender });
-
     return {
       userParticipation,
-      analysisResult,
     };
   }
 
@@ -88,7 +84,8 @@ export class UserParticipationService {
       include: {
         userTopic: {
           include: {
-            user: true },
+            user: true,
+          },
         },
       },
       orderBy: {
