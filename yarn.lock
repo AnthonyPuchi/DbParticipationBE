@@ -1900,7 +1900,7 @@ class-validator-jsonschema@^5.0.1:
     reflect-metadata "^0.1.13"
     tslib "^2.4.1"
 
-class-validator@*, "class-validator@^0.13.0 || ^0.14.0", class-validator@^0.14.0:
+class-validator@*, "class-validator@^0.13.0 || ^0.14.0", class-validator@^0.14.0, class-validator@^0.14.1:
   version "0.14.1"
   resolved "https://registry.npmjs.org/class-validator/-/class-validator-0.14.1.tgz"
   integrity sha512-2VEG9JICxIqTpoK1eMzZqaV+u/EiwEJkMGzTrZf6sU/fwsnOITVgYJ8yojSy6CaXtO9V0Cc6ZQZ8h8m4UBuLwQ==
