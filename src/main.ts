@@ -1,9 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import * as socketIo from 'socket.io';
-import { Server } from "socket.io";
 import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,7 +16,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:5173',  // Cambia esto a la URL de tu frontend
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
@@ -25,7 +24,7 @@ async function bootstrap() {
   const httpServer = createServer(app.getHttpServer());
   const io = new Server(httpServer, {
     cors: {
-      origin: 'http://localhost:5173',
+      origin: 'http://localhost:5173', // Cambia esto a la URL de tu frontend
       methods: ['GET', 'POST'],
       credentials: true,
     },
@@ -42,6 +41,8 @@ async function bootstrap() {
       console.log('user disconnected');
     });
   });
+
+  await app.listen(process.env.PORT || 8000);
   httpServer.listen(process.env.PORT || 8000);
 }
 bootstrap();
