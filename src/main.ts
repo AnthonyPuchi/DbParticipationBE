@@ -20,7 +20,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const server = await app.listen(8080);
+  const server = await app.listen(8000);
   const io = new socketIo.Server(server, {
     cors: {
       origin: 'http://localhost:5173',
