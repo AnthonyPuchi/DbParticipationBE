@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as socketIo from 'socket.io';
+import { Server } from "socket.io";
+import { createServer } from 'http';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,10 +22,10 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const server = await app.listen(8000);
-  const io = new socketIo.Server(server, {
+  const httpServer = createServer(app.getHttpServer());
+  const io = new Server(httpServer, {
     cors: {
-      origin: 'http://localhost:5173',
+      origin: '*',
       methods: ['GET', 'POST'],
       credentials: true,
     },
@@ -40,5 +42,6 @@ async function bootstrap() {
       console.log('user disconnected');
     });
   });
+  httpServer.listen(process.env.PORT || 8000);
 }
 bootstrap();
