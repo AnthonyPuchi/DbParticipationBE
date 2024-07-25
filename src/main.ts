@@ -14,7 +14,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.enableCors({
-    origin: 'http://localhost:5173',  // Cambia esto a la URL de tu frontend
+    origin: ['http://localhost:5173', 'https://a1da-45-188-229-5.ngrok-free.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
