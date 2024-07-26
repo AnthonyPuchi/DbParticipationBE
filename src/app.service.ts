@@ -22,4 +22,6 @@ export class AppService implements OnModuleInit {
   sendMessage(message: string) {
     this.socket.emit('sendMessage', message);
   }
+  getHello(): string {
+    return 'Hello World!';}
 }
