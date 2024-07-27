@@ -14,7 +14,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.enableCors({
-    origin: ['http://localhost:5173', 'https://a1da-45-188-229-5.ngrok-free.app', 'https://socketio-production-ee2e.up.railway.app'],
+    origin: ['http://localhost:5173', 'https://app-discussion.vercel.app', 'https://socketio-production-ee2e.up.railway.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
