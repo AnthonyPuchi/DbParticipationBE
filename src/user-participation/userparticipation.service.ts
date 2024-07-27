@@ -43,18 +43,13 @@ export class UserParticipationService {
       orderBy: { createdAt: 'asc' },
     });
 
-    const totalParticipationCount = allParticipations.length;
+    const messages = [{ user: lastUser, text: data.message }];
+    const analysisResults = await this.messageAnalysisService.analyzeMessages(messages);
+    console.log('Analysis Results:', analysisResults);
 
-    if (totalParticipationCount % 10 === 0) {
-      const messages = allParticipations.slice(-10).map(up => up.message);
-
-      const analysisResults = await this.messageAnalysisService.analyzeMessages(messages, lastUser);
-      console.log('Analysis Results:', analysisResults);
-
-      const noAportaMessages = analysisResults.filter(result => result.includes('no está aportando nada nuevo a la discusión'));
-      if (noAportaMessages.length > 0) {
-        throw new BadRequestException(`Análisis: ${noAportaMessages.join(', ')}`);
-      }
+    const noAportaMessages = analysisResults.filter(result => result.includes('no está aportando nada nuevo a la discusión') || result.includes('está fuera del contexto del debate'));
+    if (noAportaMessages.length > 0) {
+      throw new BadRequestException(`Análisis: ${noAportaMessages.join(', ')}`);
     }
 
     return {
