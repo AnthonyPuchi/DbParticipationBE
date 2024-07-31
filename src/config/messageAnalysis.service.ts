@@ -5,7 +5,7 @@ import openai from 'src/config/openai.config';
 export class MessageAnalysisService {
   async analyzeMessages(messages: { user: string, text: string }[]): Promise<string[]> {
     const prompt = `
-      Eres un asistente útil en un chat de discusión. Tienes que analizar cada uno de los mensajes enviados por los participantes y asegurar que cada mensaje aporte nuevos conceptos y mantenga el contexto de la discusión. Si un mensaje no aporta nada nuevo, es repetitivo o no mantiene el contexto, debes indicarlo especificando el usuario que envió el mensaje.
+      Eres un asistente útil en un chat de discusión de direrentes temas. Tienes que analizar cada uno de los mensajes enviados por los participantes y asegurar que cada mensaje aporte nuevos conceptos y mantenga el contexto de la discusión. Si un mensaje no aporta nada nuevo, es repetitivo o no mantiene el contexto, debes indicarlo especificando el usuario que envió el mensaje.
 
       Aquí están los mensajes:
       ${messages.map((msg, idx) => `Mensaje ${idx + 1} de ${msg.user}: "${msg.text}"`).join('\n')}
