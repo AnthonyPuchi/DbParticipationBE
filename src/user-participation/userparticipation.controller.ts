@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UsePipes,
+  ValidationPipe,
+  BadRequestException
+} from "@nestjs/common";
 import { UserParticipationService } from './userparticipation.service';
 import { CreateUserParticipationDto } from './dto/create-userparticipation.dto';
 import { UpdateUserParticipationDto } from './dto/update-userparticipation.dto';
@@ -8,8 +19,15 @@ export class UserParticipationController {
   constructor(private readonly userParticipationService: UserParticipationService) {}
 
   @Post()
-  async create(@Body() createUserParticipationDto: CreateUserParticipationDto) {
-    return this.userParticipationService.create(createUserParticipationDto);
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  async createUserParticipation(@Body() createUserParticipationDto: CreateUserParticipationDto) {
+    try {
+      const result = await this.userParticipationService.create(createUserParticipationDto);
+      return result;
+    } catch (error) {
+      console.error('Error creating user participation:', error);
+      throw new BadRequestException(error.message);
+    }
   }
 
   @Get()

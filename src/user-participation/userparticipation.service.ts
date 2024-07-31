@@ -31,29 +31,23 @@ export class UserParticipationService {
 
     const userParticipation = await this.prisma.userParticipation.create({ data: messageWithSender });
 
-    const allParticipations = await this.prisma.userParticipation.findMany({
-      where: { userTopic: { topicId: data.topicId } },
-      include: {
-        userTopic: {
-          include: {
-            user: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'asc' },
-    });
-
     const messages = [{ user: lastUser, text: data.message }];
     const analysisResults = await this.messageAnalysisService.analyzeMessages(messages);
     console.log('Analysis Results:', analysisResults);
 
-    const noAportaMessages = analysisResults.filter(result => result.includes('no está aportando nada nuevo a la discusión') || result.includes('está fuera del contexto del debate'));
+    const noAportaMessages = analysisResults.filter(result =>
+      result.includes('no está aportando nada nuevo a la discusión') ||
+      result.includes('está fuera del contexto del debate')
+    );
+
+    let analysisFeedback = '';
     if (noAportaMessages.length > 0) {
-      throw new BadRequestException(`Análisis: ${noAportaMessages.join(', ')}`);
+      analysisFeedback = `Análisis: ${noAportaMessages.join(', ')}`;
     }
 
     return {
       userParticipation,
+      analysisFeedback,
     };
   }
 
