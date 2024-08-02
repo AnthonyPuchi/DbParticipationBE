@@ -11,4 +11,8 @@ export class CreateTopicDto {
   @IsString()
   title: string;
 
+  @ApiProperty()
+  @IsString()
+  description: string;
+
 }

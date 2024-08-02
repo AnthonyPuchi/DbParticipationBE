@@ -15,7 +15,7 @@ export class UserParticipationService {
   async create(data: any): Promise<any> {
     const userTopic = await this.prisma.userTopic.findUnique({
       where: { id: data.userTopicId },
-      include: { user: true },
+      include: { user: true, topic: true },  // Incluir el tópico para obtener la descripción
     });
 
     if (!userTopic) {
@@ -23,16 +23,18 @@ export class UserParticipationService {
     }
 
     const lastUser = `${userTopic.user.firstName} ${userTopic.user.lastName}`;
+    const topicDescription = userTopic.topic.description;  // Obtener la descripción del tópico
 
     const messageWithSender = {
       ...data,
       sender: lastUser,
+      userId: userTopic.userId, // Añadir userId
     };
 
     const userParticipation = await this.prisma.userParticipation.create({ data: messageWithSender });
 
     const messages = [{ user: lastUser, text: data.message }];
-    const analysisResults = await this.messageAnalysisService.analyzeMessages(messages);
+    const analysisResults = await this.messageAnalysisService.analyzeMessages(topicDescription, messages);
     console.log('Analysis Results:', analysisResults);
 
     const noAportaMessages = analysisResults.filter(result =>

@@ -96,6 +96,7 @@ async function main() {
     data: {
       title: 'Introduction to Programming',
       roomId: room.id,
+      description: 'Discuss the basics and advanced features of Prisma',
     },
   });
 

@@ -142,6 +142,7 @@ model Room {
 model Topic {
   id             String          @id @default(uuid()) @db.Uuid
   title          String
+  description    String?
   roomId         String          @default(uuid()) @db.Uuid
   room           Room            @relation(fields: [roomId], references: [id])
   transcriptions Transcription[]
@@ -152,7 +153,7 @@ model Topic {
 }
 
 model UserTopic {
-  id                 String              @id @default(uuid())
+  id                 String              @id @default(uuid()) @db.Uuid
   userId             String              @db.Uuid
   topicId            String              @db.Uuid
   participationCount Int                 @default(0)
@@ -222,6 +223,7 @@ model FocusScoreFormula {
 model UserParticipation {
   id          String    @id @default(uuid()) @db.Uuid
   userTopicId String    @db.Uuid
+  userId      String    @db.Uuid
   message     String
   status      Boolean
   sender      String?
