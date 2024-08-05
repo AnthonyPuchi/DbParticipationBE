@@ -7,9 +7,9 @@ export class MessageAnalysisService {
 
     const prompt = `
       Eres un asistente útil en un chat de discusión de diferentes temas. El tema de la discusión es: "${topicDescription}".
-      Tu tarea es analizar cada uno de los mensajes enviados por los participantes y asegurar que cada mensaje aporte nuevos conceptos y mantenga el contexto de la discusión. Si un mensaje no aporta nada nuevo, es repetitivo, o no mantiene el contexto, debes indicarlo especificando el usuario que envió el mensaje y la razón de la observación.
+      Tu tarea es analizar cada uno de los mensajes enviados por todos los participantes y asegurar que cada mensaje aporte nuevos conceptos y mantenga el contexto de la discusión. Si un mensaje no aporta nada nuevo en la discusión, o esta repetiendo el mismo mensaje de los demás participantes sin ningún aporte, o no mantiene el contexto, debes indicarlo especificando el usuario que envió el mensaje y la razón de la observación.
 
-      Aquí están los mensajes:
+      Aquí están los mensajes: 
       ${messages.map((msg, idx) => `Mensaje ${idx + 1} de ${msg.user}: "${msg.text}"`).join('\n')}
 
       Ejemplos de observaciones:
